@@ -1,0 +1,116 @@
+.h1{
+    font-family: monospace;
+    margin-left: 4rem;
+    font-size: 2rem;
+    color: slateblue;
+    height: 1.5rem;
+}
+.block {
+    border-radius: 4px;
+    margin-left: 4rem;
+    width: fit-content;
+
+    
+}
+.block p{
+    text-align: center;
+    font-size: 1.1rem;
+}
+.block button {
+    font-size: 1.5rem;
+    cursor: pointer;
+    background-color: white;
+    border-color: grey;
+    border-radius: 10px;
+    box-shadow: 0 4px #9999997d;
+    height: 2rem;
+  }
+
+.workspace{
+    width: 48rem;
+    height: 26rem;
+    background-color: rgba(0, 255, 238, 0.269);
+    margin-left: 4rem;
+    border-radius: 4px;
+}
+ .insert{
+    width: 40rem;
+    height: 1.5rem;
+    border-radius: 5px;
+    border-color: #666;
+    box-shadow: 0 4px #9999997d;
+    font-size: 1.1rem;
+    margin-left: 0.5rem;
+    margin-top: 0.5rem;
+}
+.date{
+    width: 5rem;
+    height: 1.5rem;
+    border-radius: 5px;
+    border-color: #666;
+    box-shadow: 0 4px #9999997d;
+    font-size: 1.1rem;
+}
+.workspace textarea{
+    width: 40rem;
+    height: 5rem;
+    border-radius: 5px;
+    border-color: #666;
+    box-shadow: 0 4px #9999997d;
+    font-size: 1.1rem;
+    margin-top: 0.5rem;
+    margin-left: 0.5rem;
+}
+.workspace button{
+    justify-content: center;
+    font-size: 1.5rem;
+    background-color: rgba(105, 90, 205, 0.57);
+    border-color: grey;
+    border-radius: 5px;
+    box-shadow: 0 4px #9999997d;
+    width: 5.5rem;
+    padding-top: 4rem;
+    margin-left: 0.2rem;
+}
+.info{
+    font-size: 1rem;
+    font-family: monospace;
+    background-color: white;
+    margin-left: 0.5rem;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+    width: 40rem;
+}
+.info1{
+    display: inline-block;
+    width: 8rem;
+    text-align: center;
+
+}
+
+.table{
+    font-family: monospace;
+    font-size: 1rem;
+    width: 46.8rem;
+}
+.tbl1{
+    width: 8rem;
+}
+.tbl2{
+    width: 34rem;
+}
+.tbl3{
+    width: 8rem;
+}
+.tbl4{
+    justify-content: center;
+    font-size: 1.1rem;
+    background-color: rgba(105, 90, 205, 0.57);
+    border-color: grey;
+    border-radius: 5px;
+    box-shadow: 0 4px #9999997d;
+    width: 5.5rem;
+    margin-left: 0.2rem;
+}
+
+
