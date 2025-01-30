@@ -386,7 +386,8 @@ $signedParams = $signer->sign(base64_encode(serialize($arResult['ORIGINAL_PARAME
 		margin-bottom: 15px;
 	}
 
-	.catalog-item-modal table td input {
+	.catalog-item-modal table td input,
+	.input_quantity {
 		border: 2px solid #28217b;
 	    border-radius: 5px;
 	    height: 34px;
@@ -482,6 +483,11 @@ $signedParams = $signer->sign(base64_encode(serialize($arResult['ORIGINAL_PARAME
 				{
 					if (data.productName) $('#catalog_item_child_modal .modal-subtitle').html(data.productName);
 
+					if (data.productId){
+						$('#catalog_item_child_modal [data-entity="main_item_quantity"]').attr('name', `WRITEOFFS[PRODUCT_${productId}][STORE_MAIN]`);
+						$('#catalog_item_child_modal [data-entity="main_item_comment"]').attr('name', `COMMENTS[PRODUCT_${productId}][STORE_MAIN]`);
+					} 
+
 					$('#catalog_item_child_modal .modal-body').html(data.content);
 
 					
@@ -502,32 +508,29 @@ $signedParams = $signer->sign(base64_encode(serialize($arResult['ORIGINAL_PARAME
 
 	$(document).on('click body', '.modal-body .product-item-amount-field-btn-minus, .modal-body .product-item-amount-field-btn-plus', function(e) {
 		var inp = $(this).parent().find('input');
-		if (inp.length > 0 && inp[0]) inp = inp[0];
-		else return;
+		if (inp.length > 0 && inp[0]){
+			inp = inp[0];
+		} else {
+			return;
+		} 
 
         if (this.classList.contains('product-item-amount-field-btn-minus')) {
-            inp.value = Number(this.parentElement.querySelector('input').value) - 1
+            inp.value = Number(this.parentElement.querySelector('input').value) - 1;
         } else if (this.classList.contains('product-item-amount-field-btn-plus')) {
-            inp.value = Number(this.parentElement.querySelector('input').value) + 1
+            inp.value = Number(this.parentElement.querySelector('input').value) + 1;
         }
 
-        if (this.parentElement.querySelector('input').getAttribute('min-value') < this.parentElement.querySelector('input').value)
+        if (this.parentElement.querySelector('input').value <= 0){
+			$('.product-item-amount-field-btn-minus').addClass("disabled");
+			$('.catalog-modal-quantity-save').addClass('disabled');
+			inp.value = 0;
+			$('.catalog-modal-quantity-save').text('Обновить');
+			
+		} else {
         	$('.product-item-amount-field-btn-minus').removeClass("disabled");
-        else if (this.parentElement.querySelector('input').getAttribute('min-value') == this.parentElement.querySelector('input').value)
-        	$('.product-item-amount-field-btn-minus').addClass("disabled");
-
-        console.log(this.parentElement.querySelector('input').value, this.parentElement.querySelector('input').getAttribute('min-value'));
-
-        if (parseInt(this.parentElement.querySelector('input').value) > parseInt(this.parentElement.querySelector('input').getAttribute('min-value')))
-        {
-        	$('.catalog-modal-quantity-save').text('Добавить ' + (parseInt(this.parentElement.querySelector('input').value) - parseInt(this.parentElement.querySelector('input').getAttribute('min-value'))));
-	    	$('.catalog-modal-quantity-save').removeClass('disabled');
-        }
-	    else
-	    {
-	    	$('.catalog-modal-quantity-save').text('Обновить');
-	    	$('.catalog-modal-quantity-save').addClass('disabled');
-	    }
+			$('.catalog-modal-quantity-save').removeClass('disabled');
+			$('.catalog-modal-quantity-save').text('Добавить ' + inp.value);
+		}
 	});
 
 	$(document).on('input', '.modal-body .product-item-amount-field', function() {
@@ -572,6 +575,7 @@ $signedParams = $signer->sign(base64_encode(serialize($arResult['ORIGINAL_PARAME
 			data: {
 				action: 'updateQuantity',
 				data: data,
+				type: "add",
 				sessid: BX.bitrix_sessid()
 			},
 			method: 'POST',
@@ -602,7 +606,6 @@ $signedParams = $signer->sign(base64_encode(serialize($arResult['ORIGINAL_PARAME
 	                if (data.itemIds)
 	                {
 	                	for (let key in data.itemIds) {
-							console.log(data.cnts[data.itemIds[key]]);
 
 							$('.sets-table tr[item-id="'+data.itemIds[key]+'"]').addClass('highlighted');
 
@@ -693,9 +696,7 @@ $signedParams = $signer->sign(base64_encode(serialize($arResult['ORIGINAL_PARAME
 
 	                $('#catalog_item_child_modal').modal('hide');
 
-	                // setTimeout(function (){
-					//   $('#catalog_item_amount_modal').modal('hide');
-					// }, 300);
+					location.reload();
 	                
 				}
 				else
@@ -808,7 +809,17 @@ $signedParams = $signer->sign(base64_encode(serialize($arResult['ORIGINAL_PARAME
 			<div class="modal-header">
 				<div class="modal-title modal-title-grid">
 					Списание брака
-					<sapn class="modal-subtitle"></sapn>
+					<sapn style="padding: 6px 15px;font-weight: bold;" class="modal-subtitle"></sapn>
+					<table>
+						<tr>
+							<th>К списанию</th>
+							<th>Комментарий</th>
+						</tr>
+						<tr>
+							<td><input class="modal-write-off-field" data-entity="main_item_quantity" name="WRITEOFFS[PRODUCT_1159][STORE_MAIN]" type="text" onkeypress="return event.charCode >= 48 && event.charCode <= 57"></td>
+							<td><input class="modal-comment-field" data-entity="main_item_comment" name="COMMENTS[PRODUCT_1159][STORE_MAIN]"></td>
+						</tr>
+					</table>
 				</div>
 				
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
