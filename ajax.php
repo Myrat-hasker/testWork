@@ -18,7 +18,7 @@ if ($USER->isAuthorized() && Loader::IncludeModule('catalog') /*&& check_bitrix_
 
 		if (is_array($data) && $data['QUANTITY'])
 		{
-			$productIds = array_keys($data['QUANTITY']); 		//получаем ключи = ['PRODUCT_860']
+			$productIds = array_keys($data['QUANTITY']);
 
 			if (empty($productIds))
 			{
@@ -26,12 +26,12 @@ if ($USER->isAuthorized() && Loader::IncludeModule('catalog') /*&& check_bitrix_
 				return;
 			}
 
-			$productIds = array_map(function($item) {			//получаем ключи = ['860']
+			$productIds = array_map(function($item) {
 			    return str_replace('PRODUCT_', '', $item);
 			}, $productIds);
 
 			$products = [];
-			$res = \Bitrix\Catalog\ProductTable::GetList([ 		//получаем кол-во и ид товара [ID: "860", QUANTITY: "10"]
+			$res = \Bitrix\Catalog\ProductTable::GetList([
 				'filter' => ['ID' => $productIds],
 				'select' => ['ID', 'QUANTITY'],
 			]);
@@ -42,7 +42,7 @@ if ($USER->isAuthorized() && Loader::IncludeModule('catalog') /*&& check_bitrix_
 
 			$storeQuantities = [];
 
-			$res = \Bitrix\Catalog\StoreProductTable::getList([		//получаем кол-во товара на складах [пусто]
+			$res = \Bitrix\Catalog\StoreProductTable::getList([
 				'filter' => ['PRODUCT_ID' => $productIds, 'STORE.ACTIVE' => 'Y'],
 				'select' => ['ID', 'STORE_ID', 'PRODUCT_ID', 'AMOUNT']
 			]);
@@ -55,7 +55,7 @@ if ($USER->isAuthorized() && Loader::IncludeModule('catalog') /*&& check_bitrix_
 
 			$stores = [];
 
-			$res = \Bitrix\Catalog\StoreTable::getList([		//получаем информацию о складах [пусто]
+			$res = \Bitrix\Catalog\StoreTable::getList([
 				'filter' => ['ACTIVE' => 'Y'],
 			]);
 			while ($item = $res->fetch())
@@ -67,20 +67,19 @@ if ($USER->isAuthorized() && Loader::IncludeModule('catalog') /*&& check_bitrix_
 				];
 			}
 
-			foreach ($products as $product) //перебираем товары
+			foreach ($products as $product)
 			{
 				$sets = [];
 				$setIds = [];
 
-				//получаем данные по каждому элементу комплекта
-				$res = CCatalogProductSet::GetList([], ['OWNER_ID' => $product['ID'], '>SET_ID' => 0], false, false, []); 
+				$res = CCatalogProductSet::GetList([], ['OWNER_ID' => $product['ID'], '>SET_ID' => 0], false, false, []);
 			    while ($item = $res->fetch())
 			    {
 			    	$setIds[] = $item['ITEM_ID'];
 			    	$sets[] = $item;
 			    }
 
-			    $res = \Bitrix\Catalog\ProductTable::GetList([		//получает данные о комплектующих товара и дополняет $sets
+			    $res = \Bitrix\Catalog\ProductTable::GetList([
 					'filter' => ['ID' => $setIds],
 					'select' => ['ID', 'NAME' => 'IBLOCK_ELEMENT.NAME', 'QUANTITY'],
 				]);
@@ -93,8 +92,6 @@ if ($USER->isAuthorized() && Loader::IncludeModule('catalog') /*&& check_bitrix_
 			    	}
 				}
 
-				//$quantity 			- кол-во товара из формы
-				//$product["quantity"] 	- кол-во товара из каталога
 				foreach ($data['QUANTITY']['PRODUCT_'.$product['ID']] as $storeId => $quantity)
 				{
 					$storeId = str_replace('STORE_', '', $storeId);
@@ -114,7 +111,7 @@ if ($USER->isAuthorized() && Loader::IncludeModule('catalog') /*&& check_bitrix_
 					    $setsCount = [];
 					    $insufficientSets = [];
 
-					    foreach ($sets as $set)		//вычитываем кол-во комплектующих
+					    foreach ($sets as $set)
 					    {
 					    	$setsCount[$set['ITEM_ID']] = $set['CATALOG_QUANTITY'] - ($set['QUANTITY'] * ($quantity - $product['QUANTITY']));
 
@@ -151,9 +148,9 @@ if ($USER->isAuthorized() && Loader::IncludeModule('catalog') /*&& check_bitrix_
 							'AMOUNT' => ($quantity - $product['QUANTITY']),
 						];
 
-					    $DB->StartTransaction(); //начало транзакции
+					    $DB->StartTransaction();
 
-						$result = \Bitrix\Catalog\ProductTable::Update($product['ID'], $arFields); //обновляем данные товара
+						$result = \Bitrix\Catalog\ProductTable::Update($product['ID'], $arFields);
 						if (!$result->isSuccess())
 						{
 							$DB->Rollback();
@@ -162,7 +159,7 @@ if ($USER->isAuthorized() && Loader::IncludeModule('catalog') /*&& check_bitrix_
 						}
 						else
 						{
-							foreach ($setsCount as $id => $cnt) //обновляем данные количество комплектующих
+							foreach ($setsCount as $id => $cnt)
 							{
 								$arFields = [
 							        'QUANTITY' => $cnt,
@@ -239,7 +236,7 @@ if ($USER->isAuthorized() && Loader::IncludeModule('catalog') /*&& check_bitrix_
 		return;
 	}
 
-	if ($request->get('action') == 'writeOff' && $request->isPost()) //форма списание товаров
+	if ($request->get('action') == 'writeOff' && $request->isPost())
 	{
 		$data = $request->get('data');
 
@@ -257,20 +254,19 @@ if ($USER->isAuthorized() && Loader::IncludeModule('catalog') /*&& check_bitrix_
 			    return str_replace('PRODUCT_', '', $item);
 			}, $productIds);
 
-			$products = [];		
-			$res = \Bitrix\Catalog\ProductTable::GetList([					//получаем кол-во товаров по id
+			$products = [];
+			$res = \Bitrix\Catalog\ProductTable::GetList([
 				'filter' => ['ID' => $productIds],
 				'select' => ['ID', 'QUANTITY'],
 			]);
-
 			while ($item = $res->fetch())
 			{
 			    $products[] = $item;
 			}
-			
+
 			$storeQuantities = [];
 
-			$res = \Bitrix\Catalog\StoreProductTable::getList([				//получаем кол-во товаров на складах
+			$res = \Bitrix\Catalog\StoreProductTable::getList([
 				'filter' => ['PRODUCT_ID' => $productIds, 'STORE.ACTIVE' => 'Y'],
 				'select' => ['ID', 'STORE_ID', 'PRODUCT_ID', 'AMOUNT']
 			]);
@@ -280,11 +276,10 @@ if ($USER->isAuthorized() && Loader::IncludeModule('catalog') /*&& check_bitrix_
 
 				$storeQuantities[$item['STORE_ID']] += $item['AMOUNT'];
 			}
-			
 
 			$stores = [];
 
-			$res = \Bitrix\Catalog\StoreTable::getList([					//получаем информацию о складах
+			$res = \Bitrix\Catalog\StoreTable::getList([
 				'filter' => ['ACTIVE' => 'Y'],
 			]);
 			while ($item = $res->fetch())
@@ -295,16 +290,6 @@ if ($USER->isAuthorized() && Loader::IncludeModule('catalog') /*&& check_bitrix_
 					'QUANTITY' => $storeQuantities[$item['ID']] ?? 0,
 				];
 			}
-
-			// $helper = 1;
-			// if ($helper == 1) {
-			// 	echo json_encode([
-			// 		'error' => true,
-			// 		 'message1' => $storeQuantities,
-			// 		  'message2' => $stores
-			// 		]);
-			// 	return;
-			// }
 
 			$writeoffs = [];
 
@@ -328,7 +313,7 @@ if ($USER->isAuthorized() && Loader::IncludeModule('catalog') /*&& check_bitrix_
 					    if ($arFields['QUANTITY'] < 0)
 					    {
 
-					    	echo json_encode(['error' => true, 'message' => 'Ошибка: текущий остаток ' . $product['QUANTITY'] . ' попытка списать ' . $quantity, 'productId' => $product['ID'], 'storeId' => $storeId]);
+					    	echo json_encode(['error' => true, 'message' => 'Ошибка: текущий остаток ' . $product['QUANTITY'] . ' прпытка списать ' . $quantity, 'productId' => $product['ID'], 'storeId' => $storeId]);
 							return;
 					    }
 
@@ -506,7 +491,7 @@ if ($USER->isAuthorized() && Loader::IncludeModule('catalog') /*&& check_bitrix_
 									<path d="M0 2V0H14V2H0Z" fill="white" />
 								</svg>
 							</span>
-							<input class="product-item-amount-field" type="text" value="0" min-value="<?=$store['QUANTITY']?>" name="QUANTITY[PRODUCT_<?=$arProduct['ID']?>][STORE_<?=$store['ID']?>]" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+							<input class="product-item-amount-field" type="text" value="<?=($data && $data['amnt'] && $data['amnt'] > 0) ? $store['QUANTITY'] + $data['amnt'] : $store['QUANTITY']?>" min-value="<?=$store['QUANTITY']?>" name="QUANTITY[PRODUCT_<?=$arProduct['ID']?>][STORE_<?=$store['ID']?>]" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
 							<span class="product-item-amount-field-btn-plus no-select modal-view">
 								<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
 									<path d="M5.87692 14V8.12308H0V5.86154H5.87692V0H8.13846V5.86154H14V8.12308H8.13846V14H5.87692Z" fill="white" />
@@ -514,11 +499,11 @@ if ($USER->isAuthorized() && Loader::IncludeModule('catalog') /*&& check_bitrix_
 							</span>
 						</div>
 					</div>
-					<!-- <div class="col-sm">
+					<div class="col-sm">
 						<span class="catalog-modal-btn catalog-modal-btn-secendory">
-							<p><?//=$store['TITLE']?></p>
+							<p><?=$store['TITLE']?></p>
 						</span>
-					</div> -->
+					</div>
 					<div class="col-sm">
 						<span class="catalog-modal-btn catalog-modal-btn-secendory open-catalog-item-child-modal" product-id="<?=$arProduct['ID']?>" store-id="<?=$store['ID']?>">
 							<p>Списание&nbsp;брака</p>
@@ -647,7 +632,7 @@ if ($USER->isAuthorized() && Loader::IncludeModule('catalog') /*&& check_bitrix_
 		<?
 		$content = ob_get_clean();
 
-		echo json_encode(['success' => true, 'productName' => $arProduct['NAME'], 'productId' => $arProduct['ID'], 'content' => $content]);
+		echo json_encode(['success' => true, 'productName' => $arProduct['NAME'], 'content' => $content]);
 		return;
 	}
 
